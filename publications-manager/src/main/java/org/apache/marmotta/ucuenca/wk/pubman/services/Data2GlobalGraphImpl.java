@@ -89,6 +89,7 @@ public class Data2GlobalGraphImpl implements Data2GlobalGraph, Runnable {
     @Inject
     private SparqlService sparqlService;
 
+    
     @Override
 
     public String LoadData2GlobalGraph() {
