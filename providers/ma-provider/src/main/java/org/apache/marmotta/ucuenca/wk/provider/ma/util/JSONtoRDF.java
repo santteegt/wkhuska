@@ -20,6 +20,7 @@ public class JSONtoRDF {
     private Model model;
     private Map<String, String> schema;
     private final ValueFactory factory = ValueFactoryImpl.getInstance();
+    private String authorNamespace="http://academic.research.microsoft.com/Author/";
 
     public JSONtoRDF(String resource, Map<String, String> schema, JsonArray data, Model model) {
         this.resource = resource;
@@ -124,7 +125,7 @@ public class JSONtoRDF {
                 aux = json.get("authors").getAsJsonArray();
                 String authors = "";
                 for (JsonElement version : aux) {
-                    authors += "<" + (("http://academic.research.microsoft.com/Author/" + version.getAsJsonObject().get("id").getAsString() + "/").trim()) + "> ";
+                    authors += "<" + ((authorNamespace + version.getAsJsonObject().get("id").getAsString() + "/").trim()) + "> ";
 
                 }
 
@@ -135,9 +136,15 @@ public class JSONtoRDF {
                 aux = json.get("authors").getAsJsonArray();
                 for (JsonElement version : aux) {
                     model.add(factory.createStatement(factory.createURI(resource),
-                            factory.createURI(schema.get(key)), factory.createURI("http://academic.research.microsoft.com/Author/" + version.getAsJsonObject().get("id").getAsString() + "/")));
-
+                            factory.createURI(schema.get(key)), factory.createURI(authorNamespace + version.getAsJsonObject().get("id").getAsString() + "/")));
+                    model.add(factory.createStatement(factory.createURI(authorNamespace + version.getAsJsonObject().get("id").getAsString() + "/"),
+                            factory.createURI(schema.get("entity::property:fname")), factory.createLiteral(version.getAsJsonObject().get("firstName").getAsString())));
+                    model.add(factory.createStatement(factory.createURI(authorNamespace + version.getAsJsonObject().get("id").getAsString() + "/"),
+                            factory.createURI(schema.get("entity::property:lname")), factory.createLiteral(version.getAsJsonObject().get("lastName").getAsString())));
+                      model.add(factory.createStatement(factory.createURI(authorNamespace + version.getAsJsonObject().get("id").getAsString() + "/"),
+                            factory.createURI(schema.get("entity::property:mname")), factory.createLiteral(version.getAsJsonObject().get("middleName").getAsString())));
                 }
+
                 break;
             default:
                 break;

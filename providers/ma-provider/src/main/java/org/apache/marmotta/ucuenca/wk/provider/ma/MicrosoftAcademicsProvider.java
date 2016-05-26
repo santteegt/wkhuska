@@ -43,7 +43,7 @@ import org.apache.marmotta.ucuenca.wk.provider.ma.util.JSONtoRDF;
 import org.apache.marmotta.ucuenca.wk.provider.ma.util.MapPublications;
 import org.apache.marmotta.ucuenca.wk.provider.ma.util.Publication;
 import org.json.simple.parser.ParseException;
-
+import org.openrdf.model.vocabulary.FOAF;
 
 /**
  * Support Google Scholar information as RDF
@@ -82,7 +82,9 @@ public class MicrosoftAcademicsProvider extends AbstractHttpProvider {
         MAPPINGSCHEMA.put("entity::property:citationCount", nsUcuenca + "citationCount");
         MAPPINGSCHEMA.put("entity::property:contributor", "http://purl.org/dc/terms/contributor");
         MAPPINGSCHEMA.put("entity::property:fullversionurl", nsUcuenca + "FullVersionURL");
-        
+        MAPPINGSCHEMA.put("entity::property:fname", FOAF.FIRST_NAME.toString());
+        MAPPINGSCHEMA.put("entity::property:lname", FOAF.LAST_NAME.toString());
+        MAPPINGSCHEMA.put("entity::property:mname", FOAF.NICK.toString());
 
     }
 
@@ -149,8 +151,8 @@ public class MicrosoftAcademicsProvider extends AbstractHttpProvider {
             BufferedReader streamReader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
             StringBuilder responseStrBuilder = new StringBuilder();
 
-            String inputStr=streamReader.readLine();
-            while (inputStr  != null) {
+            String inputStr = streamReader.readLine();
+            while (inputStr != null) {
                 responseStrBuilder.append(inputStr);
                 inputStr = streamReader.readLine();
             }

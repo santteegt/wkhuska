@@ -39,11 +39,12 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import static org.apache.marmotta.ucuenca.wk.provider.ma.MicrosoftAcademicsProvider.MAPPINGSCHEMA;
 import org.apache.marmotta.ucuenca.wk.provider.ma.util.JSONtoRDF;
 import org.apache.marmotta.ucuenca.wk.provider.ma.util.MapPublications;
 import org.apache.marmotta.ucuenca.wk.provider.ma.util.Publication;
 import org.json.simple.parser.ParseException;
-
+import org.openrdf.model.vocabulary.FOAF;
 
 /**
  * Support Google Scholar information as RDF
@@ -80,6 +81,9 @@ public class MicrosoftAcademicsTitleProvider extends AbstractHttpProvider {
         MAPPINGSCHEMA.put("entity::property:citationCount", nsUcuenca + "citationCount");
         MAPPINGSCHEMA.put("entity::property:contributor", "http://purl.org/dc/terms/contributor");
         MAPPINGSCHEMA.put("entity::property:fullversionurl", nsUcuenca + "FullVersionURL");
+        MAPPINGSCHEMA.put("entity::property:fname", FOAF.FIRST_NAME.toString());
+        MAPPINGSCHEMA.put("entity::property:lname", FOAF.LAST_NAME.toString());
+        MAPPINGSCHEMA.put("entity::property:mname", FOAF.NICK.toString());
 
     }
 
