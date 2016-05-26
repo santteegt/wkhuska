@@ -64,7 +64,7 @@ public class DBLPAuthorRawProvider extends AbstractHttpProvider {
     private static ConcurrentMap<String, String> dblpNamespaces = new ConcurrentHashMap<String, String>();
 
     static {
-        dblpNamespaces.put("dblp", "http://dblp.dagstuhl.de/rdf/schema-2015-01-26#");
+        dblpNamespaces.put("dblp", "dblp.dagstuhl.de/rdf/schema-2015-01-26#");
         dblpNamespaces.put("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         dblpNamespaces.put("owl", "http://www.w3.org/2002/07/owl#");
         dblpNamespaces.put("dcterms", "http://purl.org/dc/terms/");
@@ -120,7 +120,7 @@ public class DBLPAuthorRawProvider extends AbstractHttpProvider {
             Preconditions.checkState(StringUtils.isNotBlank(resource) && m.find());
         }
 
-        uri += isLegacy ? (m.group(3).replaceFirst("^hd/", "xr/").concat(".rdf")) : ("xr/" + m.group(2));
+        uri += isLegacy ? (m.group(3).replaceFirst("^hd/", "xr/").concat(".rdf")) : ("xr/" + m.group(2)).concat(".rdf");
 //        uri += isLegacy ? ("xr/" + m.group(2)) : ("xr/" + m.group(2));
         return Collections.singletonList(uri);
     }
@@ -142,7 +142,7 @@ public class DBLPAuthorRawProvider extends AbstractHttpProvider {
             throw new DataRetrievalException("I/O error while parsing response", e);
         }
         Model publications = triples.filter(null,
-                factory.createURI(dblpNamespaces.get("dblp") + "authorOf"), null);
+                factory.createURI("http://"+dblpNamespaces.get("dblp") + "authorOf"), null);
         Resource subject = publications.subjects().iterator().next();
         triples.add(factory.createURI(resource), OWL.SAMEAS, subject);
         Set<Value> resources = publications.objects();
