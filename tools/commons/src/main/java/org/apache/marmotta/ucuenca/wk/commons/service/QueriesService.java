@@ -78,6 +78,8 @@ public interface QueriesService {
     String getEndpointDataQuery(String... arg);
 
     String getlisEndpointsQuery(String endpointsGraph);
+    
+    String getlistEndpointNamesQuery();
 
     String getEndpointByIdQuery(String endpointsGraph, String id);
 

@@ -162,11 +162,12 @@ public class AuthorWebService {
             String endpoint = urisString.split("\"")[11];
             String graphUri = urisString.split("\"")[15];
             String fullName = urisString.split("\"")[19];
-            String city = urisString.split("\"")[23];
-            String province = urisString.split("\"")[27];
-            String latitude = urisString.split("\"")[31];
-            String longitude = urisString.split("\"")[35];
-            String result = endpointService.addEndpoint(status, name, endpoint, graphUri, fullName, city, province, latitude, longitude);
+            String englishName = urisString.split("\"")[23];
+            String city = urisString.split("\"")[27];
+            String province = urisString.split("\"")[31];
+            String latitude = urisString.split("\"")[35];
+            String longitude = urisString.split("\"")[39];
+            String result = endpointService.addEndpoint(status, name, endpoint, graphUri, fullName, englishName, city, province, latitude, longitude);
             return Response.ok().entity(result).build();
         }
 

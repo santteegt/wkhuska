@@ -27,6 +27,7 @@ wkhomeControllers.controller('listSources', ['sparqlQuery', '$scope', 'globalDat
                 + '?subject uc:fullName ?fullName. '
                 + '?subject uc:city ?city. '
                 + '?subject uc:province ?province. '
+                + 'FILTER (lang(?fullName) = "es").'
                 + '}'
                 + '} ';
         sparqlQuery.querySrv({query: queryKeywords}, function (rdf) {
@@ -39,7 +40,7 @@ wkhomeControllers.controller('listSources', ['sparqlQuery', '$scope', 'globalDat
                     model["fullName"] = pub["uc:fullName"];
                     model["city"] = pub["uc:city"];
                     model["url"] = "http://www." + pub["uc:name"].toLowerCase() + ".edu.ec/";
-                    $scope.datasources.push({name: model["name"], fullName: model["fullName"], url: model["url"], city: model["city"]});
+                    $scope.datasources.push({name: model["name"], fullName: model["fullName"]["@value"], url: model["url"], city: model["city"]});
                 });
                 $scope.$apply(function () {
                     $scope.sources = $scope.datasources;

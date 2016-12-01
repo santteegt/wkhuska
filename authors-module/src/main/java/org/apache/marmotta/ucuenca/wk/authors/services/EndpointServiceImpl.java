@@ -38,6 +38,7 @@ public class EndpointServiceImpl implements EndpointService {
     private QueriesService queriesService;
 
     private String endpointsGraph = "http://ucuenca.edu.ec/wkhuska/endpoints";
+    private String fullName = "fullName";
 
     @Override
     public String addEndpoint(String name, String endpointUrl, String graphUri) {
@@ -64,17 +65,18 @@ public class EndpointServiceImpl implements EndpointService {
     public String addEndpoint(String... args) {
         try {
             String resourceHash = getHashCode(args[1], args[2], args[3]);
-            String cad = "string"; String dec = "string";
+            String cad = "^^xsd:string"; String dec = "^^xsd:string";
             //List of parameters to pass
-            addEndpointData(endpointsGraph, "status", args[0], resourceHash, "boolean");
+            addEndpointData(endpointsGraph, "status", args[0], resourceHash, "^^xsd:boolean");
             addEndpointData(endpointsGraph, "name", args[1], resourceHash, cad);
             addEndpointData(endpointsGraph, "url", args[2], resourceHash,cad);
             addEndpointData(endpointsGraph, "graph", args[3], resourceHash,cad);
-            addEndpointData(endpointsGraph, "fullName", args[4], resourceHash,cad);
-            addEndpointData(endpointsGraph, "city", args[5], resourceHash,cad);
-            addEndpointData(endpointsGraph, "province", args[6], resourceHash,cad);
-            addEndpointData(endpointsGraph, "latitude", args[7], resourceHash,dec);
-            addEndpointData(endpointsGraph, "longitude", args[8], resourceHash,dec);
+            addEndpointData(endpointsGraph, fullName, args[4], resourceHash,"@es");
+            addEndpointData(endpointsGraph, fullName, args[5], resourceHash,"@en");
+            addEndpointData(endpointsGraph, "city", args[6], resourceHash,cad);
+            addEndpointData(endpointsGraph, "province", args[7], resourceHash,cad);
+            addEndpointData(endpointsGraph, "latitude", args[8], resourceHash,dec);
+            addEndpointData(endpointsGraph, "longitude", args[9], resourceHash,dec);
 
             return "Endpoint Insertado Correctamente";
         } catch (NoSuchAlgorithmException ex) {
@@ -125,7 +127,7 @@ public class EndpointServiceImpl implements EndpointService {
                 endpoint.setName(singleendpoint.get("name").stringValue());
                 endpoint.setEndpointUrl(singleendpoint.get("url").stringValue());
                 endpoint.setGraph(singleendpoint.get("graph").stringValue());
-                endpoint.setFullName(singleendpoint.get("fullName").stringValue());
+                endpoint.setFullName(singleendpoint.get(fullName).stringValue());
                 endpoint.setCity(singleendpoint.get("city").stringValue());
                 endpoint.setProvince(singleendpoint.get("province").stringValue());
                 endpoint.setLatitude(singleendpoint.get("latitude").stringValue());
@@ -149,7 +151,7 @@ public class EndpointServiceImpl implements EndpointService {
             endpoint.setName(endpointresult.get(0).get("name").stringValue());
             endpoint.setEndpointUrl(endpointresult.get(0).get("url").stringValue());
             endpoint.setGraph(endpointresult.get(0).get("graph").stringValue());
-            endpoint.setFullName(endpointresult.get(0).get("fullName").stringValue());
+            endpoint.setFullName(endpointresult.get(0).get(fullName).stringValue());
             endpoint.setCity(endpointresult.get(0).get("city").stringValue());
             endpoint.setProvince(endpointresult.get(0).get("province").stringValue());
             endpoint.setLatitude(endpointresult.get(0).get("latitude").stringValue());

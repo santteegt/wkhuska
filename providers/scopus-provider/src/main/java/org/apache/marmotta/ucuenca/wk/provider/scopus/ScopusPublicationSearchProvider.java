@@ -51,7 +51,7 @@ import org.openrdf.model.vocabulary.FOAF;
  * <p/>
  * @author Freddy Sumba
  */
-public class ScopusPublicationSearchProvider extends AbstractHttpProvider {
+    public class ScopusPublicationSearchProvider extends AbstractHttpProvider {
 
     public static final String NAME = "Scopus  Search Publication Provider";
     public static final String API = "http://api.elsevier.com/content/search/scopus?query=&apiKey=";
@@ -118,53 +118,74 @@ public class ScopusPublicationSearchProvider extends AbstractHttpProvider {
         try {
             final Document doc = new SAXBuilder(XMLReaders.NONVALIDATING).build(input);
             Element aux = doc.getRootElement();
-
+            boolean ecuatoriano = false;
             for (Element element : aux.getChildren("entry", aux.getNamespace())) {
-                String abstractDoiParam = element.getChildText("doi", NAMESPACE_PRISM);
-                String abstractURLParam = element.getChildText("url", NAMESPACE_PRISM);
-                String abstractAbstractParam = element.getChildText("description", NAMESPACE_DC);
-                List<String> creatorsList = new ArrayList<>();
-                List<Element> creators = element.getChildren("author",NAMESPACE_ATOM);
-                for (Element author : creators) {
-                    creatorsList.add(author.getChildText("author-url",NAMESPACE_ATOM));
+                if (affiliationEcuador(element.getChildren("affiliation", NAMESPACE_ATOM))) {
+                    ecuatoriano = true;
+                    break;
                 }
-
-                ClientConfiguration conf = new ClientConfiguration();
-                LDClient ldClient = new LDClient(conf);
-                if (abstractDoiParam != null) {
-                    Model candidateModel = null;
-                    String authorUrlResourceCleaned = URL_RESOURCE_PUBLICATION.replace("DOIParam", abstractDoiParam).replace("apiKeyParam", apiKeyParam);
-
-                    ClientResponse response = ldClient.retrieveResource(authorUrlResourceCleaned);
-                    ValueFactory factory = ValueFactoryImpl.getInstance();
-                    triples.add(factory.createURI("http://api.elsevier.com/content/author/author_id/" + authorIdParam), FOAF.PUBLICATIONS, factory.createURI(abstractURLParam));
-                    if (abstractAbstractParam != null) {
-                        triples.add(factory.createStatement(factory.createURI(abstractURLParam),
-                            factory.createURI("http://purl.org/ontology/bibo/abstract"), factory.createLiteral(abstractAbstractParam)));
-                    }
-                    for (String uriCreator : creatorsList) {
-                        triples.add(factory.createStatement(factory.createURI(abstractURLParam),
-                                factory.createURI("http://purl.org/dc/terms/contributor"), factory.createURI(uriCreator)));
-
-                    }
-                    Model authorModel = response.getData();
-                    if (candidateModel == null) {
-                        candidateModel = authorModel;
-                    } else {
-                        candidateModel.addAll(authorModel);
-                    }
-                    triples.addAll(candidateModel);
-
-                }
-
             }
+            if (ecuatoriano) {
+                for (Element element : aux.getChildren("entry", aux.getNamespace())) {
+                    String abstractDoiParam = element.getChildText("doi", NAMESPACE_PRISM);
+                    String abstractURLParam = element.getChildText("url", NAMESPACE_PRISM);
+                    String abstractAbstractParam = element.getChildText("description", NAMESPACE_DC);
+                    List<String> creatorsList = new ArrayList<>();
+                    List<Element> creators = element.getChildren("author",NAMESPACE_ATOM);
+                    for (Element author : creators) {
+                        creatorsList.add(author.getChildText("author-url",NAMESPACE_ATOM));
+                    }
 
+                    ClientConfiguration conf = new ClientConfiguration();
+                    LDClient ldClient = new LDClient(conf);
+                    if (abstractDoiParam != null) {
+                        Model candidateModel = null;
+                        String authorUrlResourceCleaned = URL_RESOURCE_PUBLICATION.replace("DOIParam", abstractDoiParam).replace("apiKeyParam", apiKeyParam);
+
+                        ClientResponse response = ldClient.retrieveResource(authorUrlResourceCleaned);
+                        ValueFactory factory = ValueFactoryImpl.getInstance();
+                        triples.add(factory.createURI("http://api.elsevier.com/content/author/author_id/" + authorIdParam), FOAF.PUBLICATIONS, factory.createURI(abstractURLParam));
+                        if (abstractAbstractParam != null) {
+                            triples.add(factory.createStatement(factory.createURI(abstractURLParam),
+                                factory.createURI("http://purl.org/ontology/bibo/abstract"), factory.createLiteral(abstractAbstractParam)));
+                        }
+                        for (String uriCreator : creatorsList) {
+                            triples.add(factory.createStatement(factory.createURI(abstractURLParam),
+                                    factory.createURI("http://purl.org/dc/terms/contributor"), factory.createURI(uriCreator)));
+
+                        }
+                        Model authorModel = response.getData();
+                        if (candidateModel == null) {
+                            candidateModel = authorModel;
+                        } else {
+                            candidateModel.addAll(authorModel);
+                        }
+                        triples.addAll(candidateModel);
+
+                    }
+
+                }
+            }
         } catch (IOException e) {
             throw new DataRetrievalException("I/O error while parsing HTML response", e);
         } catch (JDOMException e) {
             throw new DataRetrievalException("could not parse XML response. It is not in proper XML format", e);
         }
         return Collections.emptyList();
+    }
+    
+    private boolean affiliationEcuador(List<Element> affiliations) {
+        boolean ecuadorian = false;
+
+        for (Element affiliation : affiliations) {
+            if (affiliation.getChildText("affiliation-country", NAMESPACE_ATOM)
+                    .equalsIgnoreCase("ecuador")) {
+                ecuadorian = true;
+                break;
+            }
+        }
+            
+        return ecuadorian;
     }
 
     protected static List<Element> queryElements(Document n, String query) {

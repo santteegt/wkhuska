@@ -58,13 +58,14 @@ public class EndpointServiceTest {
         String endpointUrl = "http://example.ec/sparql";
         String graphUri = "http://example.ec/data";
         String fullName = "UNIVERSIDAD DE PRUEBA";
+        String engName = "TEST UNIVERSITY";
         String city = "CIUDAD PRUEBA";
         String province = "PROVINCIA PRUEBA";
         String latitude = "0.1000 S";
         String longitude = "4.1245 W";
         EndpointService instance = new EndpointServiceImpl();
         String expResult = "Endpoint Insertado Correctamente";
-        String result = myService.addEndpoint(state, name, endpointUrl, graphUri, fullName, city, province, latitude, longitude);
+        String result = myService.addEndpoint(state, name, endpointUrl, graphUri, fullName, engName, city, province, latitude, longitude);
         //String result = instance.addEndpoint(name, endpointUrl, graphUri);
         Assert.assertEquals(expResult, result);
     }
