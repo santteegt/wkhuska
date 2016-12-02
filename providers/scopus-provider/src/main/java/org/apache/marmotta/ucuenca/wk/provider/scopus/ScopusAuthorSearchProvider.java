@@ -58,7 +58,7 @@ public class ScopusAuthorSearchProvider extends AbstractHttpProvider {
 
     public static final String NAME = "Scopus Provider";
     public static final String API = "http://api.elsevier.com/content/search/author?query=%s&format=xml";
-    public static final String PATTERN = "http://api\\.elsevier\\.com/content/search/author\\?query\\=authfirst%28(.*)%29authlast%28(.*)%29\\+AND\\+affil%28(.*)%29\\&apiKey\\=(.*)\\&httpAccept\\=application/xml";
+    public static final String PATTERN = "http://api\\.elsevier\\.com/content/search/author\\?query\\=authfirst%28(.*)%29authlast%28(.*)%29(.*)\\&apiKey\\=(.*)\\&httpAccept\\=application/xml";
     public static final String URLRESOURCE = "http://api.elsevier.com/content/author/author_id/AuthorIdParam?apiKey=apiKeyParam&view=ENHANCED&httpAccept=application/rdf%2Bxml";
     private static Logger log = LoggerFactory.getLogger(ScopusAuthorSearchProvider.class);
     private static String apiKeyParam = "";

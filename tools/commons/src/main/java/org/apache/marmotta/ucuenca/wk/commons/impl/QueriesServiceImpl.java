@@ -127,26 +127,42 @@ public class QueriesServiceImpl implements QueriesService {
         if (condition) {
             return INSERTDATA + getGraphString(endpointsGraph) + "{<" + ENDPOINTPREFIX + resourceHash + ">  " + con.uc(parameter) + "  <" + newValue + "> }}";
         } else {
-            return INSERTDATA + getGraphString(endpointsGraph) + "{<" + ENDPOINTPREFIX + resourceHash + ">  " + con.uc(parameter) + "   '" + newValue + "'^^xsd:" + type + " }}  ";
+            return INSERTDATA + getGraphString(endpointsGraph) + "{<" + ENDPOINTPREFIX + resourceHash + ">  " + con.uc(parameter) + "   '" + newValue + "'" + type + " }}  ";
         }
     }
 
     @Override
     public String getlisEndpointsQuery(String endpointsGraph) {
         String id = " ?id ";
-        return "SELECT DISTINCT ?id ?status ?name ?url ?graph ?fullName ?city ?province ?latitude ?longitude  WHERE {  "
+        String fullName = "fullName";
+        return "SELECT DISTINCT ?id ?status ?name ?url ?graph (concat(?fName, \" - \", ?engName) as ?fullName) ?city ?province ?latitude ?longitude  WHERE {  "
                 + " GRAPH <" + endpointsGraph + ">"
                 + " {"
                 + id + con.uc("status") + " ?status."
                 + id + con.uc("name") + " ?name ."
                 + id + con.uc("url") + " ?url."
                 + id + con.uc("graph") + " ?graph."
-                + id + con.uc("fullName") + " ?fullName."
+                + id + con.uc(fullName) + " ?fName."
+                + id + con.uc(fullName) + "?engName."
                 + id + con.uc("city") + " ?city."
                 + id + con.uc("province") + " ?province."
                 + id + con.uc("latitude") + " ?latitude."
                 + id + con.uc("longitude") + " ?longitude."
+                + " FILTER (lang(?fName) = 'es') . "
+                + " FILTER (lang(?engName) = 'en') . "
                 + "}}";
+    }
+    
+    @Override
+    public String getlistEndpointNamesQuery() {
+        String id = " ?id ";
+        return "SELECT DISTINCT ?fullName WHERE {  "
+                + "  GRAPH <http://ucuenca.edu.ec/wkhuska/endpoints>"
+                + "	{"
+                + "      " + id + con.uc("fullName") + " ?fName."
+                + "      	BIND (STR(?fName)  AS ?fullName)"
+                + "	}"
+                + "}";
     }
 
     @Override

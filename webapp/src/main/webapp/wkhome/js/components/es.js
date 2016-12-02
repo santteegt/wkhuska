@@ -106,7 +106,10 @@ myApp.labels_es = {
 "read.more":"Leer mas",
 "read.less":"Leer menos",
 "pub.of":"Publicaciones de ",
-"area.study":"Areas de Estudio"
+"area.study":"Areas de Estudio",
 
+// CONTACT PAGE
+"developer": "Desarrollador",
+"coordinadora":"Coordinadora"
 };
 }());

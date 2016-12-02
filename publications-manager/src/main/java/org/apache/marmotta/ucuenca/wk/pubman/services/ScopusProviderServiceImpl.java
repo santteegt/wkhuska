@@ -23,6 +23,7 @@ import java.io.FileReader;
 //import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -107,6 +108,9 @@ public class ScopusProviderServiceImpl implements ScopusProviderService, Runnabl
     private int processpercent = 0;
 
     private String URLSEARCHSCOPUS = "http://api.elsevier.com/content/search/author?query=authfirst%28FIRSTNAME%29authlast%28LASTNAME%29+AND+affil%28PAIS%29&apiKey=a3b64e9d82a8f7b14967b9b9ce8d513d&httpAccept=application/xml";
+    private String AFFILIATIONPARAM = "+AND+affil%28PAIS%29";
+    List<Map<String, Value>> uniNames = new ArrayList<>(); //nombre de universidades
+    
     @Inject
     private SparqlService sparqlService;
 
@@ -126,6 +130,10 @@ public class ScopusProviderServiceImpl implements ScopusProviderService, Runnabl
             String authorResource = "";
             int priorityToFind = 0;
 
+            //Get names of universities from endpoints in Spanish and English
+            String getEndpointsQuery = queriesService.getlistEndpointNamesQuery();
+            uniNames = sparqlService.query(QueryLanguage.SPARQL, getEndpointsQuery);
+            
             List<Map<String, Value>> resultAllAuthors = getauthorsData.getListOfAuthors();
 
             /*To Obtain Processed Percent*/
@@ -191,16 +199,18 @@ public class ScopusProviderServiceImpl implements ScopusProviderService, Runnabl
                     String firstNameSearch = firstName.split(" ").length > 1 ? firstName.split(" ")[0] : firstName;
                     String lastNameSearch = lastName.split(" ").length > 1 ? lastName.split(" ")[0] : lastName;
                     String lastNameSearch2 = lastName.split(" ").length > 1 ? lastName.split(" ")[1] : "";
-                    uri_search.add(URLSEARCHSCOPUS.replace("FIRSTNAME", firstNameSearch.length() > 0 ? firstNameSearch : firstName).replace("LASTNAME", lastNameSearch.length() > 0 ? lastNameSearch : lastName).replace("PAIS", "Ecuador"));
-                    uri_search.add(URLSEARCHSCOPUS.replace("FIRSTNAME", firstNameSearch.length() > 0 ? firstNameSearch : firstName).replace("LASTNAME", lastNameSearch.length() > 1 ? lastNameSearch + "%20" + lastNameSearch2 : lastName).replace("PAIS", "all"));
-                    uri_search.add(URLSEARCHSCOPUS.replace("FIRSTNAME", firstNameSearch.length() > 0 ? firstNameSearch : firstName).replace("LASTNAME", lastNameSearch.length() > 0 ? lastNameSearch : lastName).replace("PAIS", "all"));
+                    uri_search.add(URLSEARCHSCOPUS.replace("FIRSTNAME", firstNameSearch.length() > 0 ? firstNameSearch : firstName).replace("LASTNAME", lastNameSearch.length() > 0 ? lastNameSearch : lastName).replace("AFFILIATION", AFFILIATIONPARAM).replace("PAIS", "Ecuador"));
+                    uri_search.add(URLSEARCHSCOPUS.replace("FIRSTNAME", firstNameSearch.length() > 0 ? firstNameSearch : firstName).replace("LASTNAME", lastNameSearch.length() > 1 ? lastNameSearch + "%20" + lastNameSearch2 : lastName).replace("AFFILIATION", ""));
+                    uri_search.add(URLSEARCHSCOPUS.replace("FIRSTNAME", firstNameSearch.length() > 0 ? firstNameSearch : firstName).replace("LASTNAME", lastNameSearch.length() > 0 ? lastNameSearch : lastName).replace("AFFILIATION", ""));
                     String scopusfirstName = "";
                     String scopuslastName = "";
                     String scopusAuthorUri = "";
                     String providerGraph = "";
-                    try {
-
-                        for (String uri_searchIterator : uri_search) {
+                    List <String> scopusAffiliation = new ArrayList();
+                    Boolean testAffiliation = true;
+                    
+                    for (String uri_searchIterator : uri_search) {
+                        try {
                             boolean existNativeAuthor = false;
                             nameToFind = uri_searchIterator;
 //                            nameToFind = URLSEARCHSCOPUS.replace("FIRSTNAME", "Mauricio").replace("LASTNAME", "Espinoza").replace("PAIS", "all");
@@ -253,24 +263,41 @@ public class ScopusProviderServiceImpl implements ScopusProviderService, Runnabl
                                     scopusfirstName = binding.getValue("firstName").stringValue();
                                     scopuslastName = binding.getValue("lastName").stringValue();
                                 }
+                                //(Jose Luis) Test the affiliation of the researcher
+                                String getScopusAffiliation = "SELECT ?affiliation "
+                                        + " WHERE { "
+                                        + " <" + scopusAuthorUri + "> <http://www.elsevier.com/xml/svapi/rdf/dtd/affiliation> ?uriAffi. "
+                                        + " ?uriAffi <http://www.w3.org/2004/02/skos/core#prefLabel> ?affiliation "
+                                        + " }";
+                                TupleQueryResult affiResult = conUri.prepareTupleQuery(QueryLanguage.SPARQL, getScopusAffiliation).evaluate();
+                                String affiliation = "";
+                                testAffiliation = true;
+                                while (affiResult.hasNext()) {
+                                    BindingSet binding = affiResult.next();
+                                    affiliation = binding.getValue("affiliation").stringValue();
+                                    scopusAffiliation.add(affiliation);
+                                    testAffiliation = testAffiliation(affiliation);
+                                    if(testAffiliation) break;    
+                                }
                                 break;
                             }
                             if (response.getHttpStatus() == 503 || membersSearchResult != 1) {
                                 log.error("Error de getStatus o Error de mas de un author como resultado de " + nameToFind);
                                 continue;
                             }
+                        } catch (DataRetrievalException e) {
+                            log.error("Data Retrieval Exception: " + e);
                         }
-                    } catch (DataRetrievalException e) {
-                        log.error("Data Retrieval Exception: " + e);
                     }
-
+                    
                     String scopusfullname = scopuslastName + ":" + scopusfirstName;
                     String localfullname = lastName + ":" + firstName;
 
 //                    if (localfullname.toUpperCase().contains("PIEDRA")) {
 //                        localfullname = localfullname.replace(".", "");
 //                    }
-                    if (membersSearchResult == 1 && distance.syntacticComparisonNames("local", localfullname, "scopus", scopusfullname)) {
+                    if (membersSearchResult == 1 //&& testAffiliation && distance.syntacticComparisonNames("local", localfullname, "scopus", scopusfullname)
+                    ) {
 
                         List<String> listA = kservice.getKeywordsOfAuthor(authorResource);//dspace
                         List<String> listB = new ArrayList<String>();//desde la fuente de pub
@@ -398,10 +425,27 @@ public class ScopusProviderServiceImpl implements ScopusProviderService, Runnabl
         } catch (Exception ex) {
             log.error("Exception: " + ex);
         }
-
         return "fail";
     }
 
+    /** Jose Luis
+     * Tests if an affiliation matches with the universities in the enpoints.
+     * @param affiliation
+     * @return 
+     */
+    private Boolean testAffiliation(String affiliation) throws MarmottaException {
+        if (affiliation.contains("Ecuador")) return true; 
+        //try to match the affiliations with a university name
+        for(Map<String, Value> name: uniNames){
+            double dist = distance.cosineSimilarityAndLevenshteinDistance(affiliation, name.get("fullName").stringValue());
+            if (dist > 0.9) {
+                //cercanos.println("Distance1: " + dist + " Scopus: " + affiliation + " Endpoint: " + name.get("fullName").stringValue() );
+                return true;
+            }
+        }
+        return false;
+    }
+    
     @Override
     public JsonArray SearchAuthorTaskImpl(String uri) {
         return null;

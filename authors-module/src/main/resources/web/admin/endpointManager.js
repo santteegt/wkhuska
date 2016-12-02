@@ -368,6 +368,7 @@
             var endpoint = document.getElementById('txtendpoint').value;
             var graphuri = document.getElementById("txtgraphuri").value;
             var fullname = document.getElementById("txtfullname").value;
+            var engname = document.getElementById("txtengname").value;
             var city = document.getElementById("txtcity").value;
             var province = document.getElementById("txtprovince").value;
             var latitude = document.getElementById("txtlatitude").value;
@@ -387,6 +388,10 @@
             }
             if (fullname == '') {
                 alert("fullname may not be empty!");
+                return;
+            } 
+            if (engname == '') {
+                alert("Name in English may not be empty!");
                 return;
             }
             if (city == '') {
@@ -411,6 +416,7 @@
                 "Endpoint": endpoint,
                 "GraphUri": graphuri,
                 "FullName": fullname,
+                "NameEnglish": engname,
                 "City": city,
                 "Province": province,
                 "Latitude": latitude,

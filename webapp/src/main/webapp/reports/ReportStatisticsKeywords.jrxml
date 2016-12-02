@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.3.1.final using JasperReports Library version 6.3.1  -->
+<!-- 2016-11-19T11:22:05 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rpt" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="f4de0d5c-6142-4862-a203-a955ab44e6d2">
+	<property name="ireport.zoom" value="1.3310000000000004"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="rutalogo" class="java.lang.String"/>
+	<field name="uri" class="java.lang.String"/>
+	<field name="key" class="java.lang.String"/>
+	<field name="total" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="130">
+			<rectangle>
+				<reportElement x="0" y="100" width="555" height="30" forecolor="#A9A9A9" uuid="c7e62162-2b3e-4f38-829c-9759a6cc1657"/>
+			</rectangle>
+			<image hAlign="Center" vAlign="Middle">
+				<reportElement x="0" y="17" width="553" height="30" uuid="50d984f6-e61f-404e-bd15-4d3b6a518f0a"/>
+				<imageExpression><![CDATA[$P{rutalogo}]]></imageExpression>
+			</image>
+			<textField pattern="dd-MM-yyyy HH:mm:ss">
+				<reportElement x="437" y="76" width="118" height="20" uuid="226a8556-2972-4c90-8e83-89b4d4bb266d"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="390" y="76" width="47" height="20" uuid="4ff2d18f-488e-4b0f-9d28-435ea1d32b6d"/>
+				<textElement>
+					<font size="9" isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Fecha: ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="61" width="555" height="13" uuid="a3b957e4-5bc0-4706-997f-ab3c96eaffed"/>
+				<textElement textAlignment="Center">
+					<font isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[REPORTE DE ESTADÍSTICAS POR UNIVERSIDAD]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="48" width="555" height="13" uuid="0f7c8acf-ea7c-42df-be60-fb87a428bb57"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[REDI - Repositorio Ecuatoriano de Investigadores]]></text>
+			</staticText>
+			<textField>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="100" width="554" height="30" forecolor="#00055F" uuid="3472f0e3-b974-4432-ab09-622822a4f177"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Palabras Claves más populares por publicaciones"]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band/>
+	</pageHeader>
+	<detail>
+		<band height="53">
+			<textField>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="1" width="554" height="32" forecolor="#00055E" uuid="e3d66d4d-e00e-44e6-aaca-3035ce0ad351"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Palabra Clave: " + $F{key}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="1" y="52" width="553" height="1" uuid="90abc26e-de71-4147-a67c-1424431a277b"/>
+			</line>
+			<textField>
+				<reportElement x="0" y="32" width="554" height="20" isRemoveLineWhenBlank="true" uuid="24baa168-e112-4f7f-867d-d4ed1daf7c98"/>
+				<textElement>
+					<font size="9" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Número de Publicaciones: " + $F{total}.replace("[\"", "").replace("\"]", "").replace("\",\"","; ")]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="41">
+			<textField>
+				<reportElement x="522" y="13" width="5" height="10" uuid="77e659a2-d75a-428c-9d0a-9c2761cc4c66"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="537" y="13" width="10" height="10" uuid="8d82ed3f-be85-484e-943d-54eead1c2291"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="508" y="13" width="10" height="10" uuid="803642d1-d940-4801-bc70-dc7bc7ae18e2"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Pg.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="531" y="13" width="7" height="10" uuid="f2b660ab-2d30-4069-b25e-ca0e5df7b71f"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[/]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+</jasperReport>

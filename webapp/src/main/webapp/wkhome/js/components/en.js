@@ -102,7 +102,10 @@ myApp.labels_en = {
 "read.more":"Read more",
 "read.less":"Read less",
 "pub.of":"Publications of ",
-"area.study":"Fields of study"
+"area.study":"Fields of study",
 
+// CONTACT PAGE
+"developer": "Developer",
+"coordinadora":"Coordinator"
 };
 }());

@@ -52,7 +52,12 @@
             </button>
         </div>
         <div class="col-md-4" align="Center">
-
+            <button ng-click="exportData('pdf', 'ReportStatisticsKeywords', 'a')" title="Export Statistics of Top Keywords to PDF">
+                <img src="./resources/pdf.png" height="36" width="36" />
+            </button>
+            <button ng-click="exportData('xls', 'ReportStatisticsKeywords', 'a')" title="Export Statistics of Top Keywords to Excel" >
+                <img src="./resources/excel.png" height="36" width="36" />
+            </button>
         </div>
         <p ng-show="loading"><img src="./resources/loading.gif" align="middle" height="20" width="20"> Loading report...</p>
     </div>

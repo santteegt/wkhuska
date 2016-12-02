@@ -165,6 +165,11 @@ public class ReportsImpl implements ReportsService {
                     parameters.put("totalAuthors", json[2]);
 
                     break;
+                case "ReportStatisticsKeywords":
+                    // Get the Json with the top keywords (considering the number of publications).
+                    json = getJSONStatisticsTopKeywords(hostname);
+
+                    break;   
             }
             //Always the first element of the array has the json stream
             stream = new ByteArrayInputStream(json[0].getBytes("UTF-8"));
@@ -398,6 +403,7 @@ public class ReportsImpl implements ReportsService {
                     + "              WHERE { "
                     + "                  GRAPH <" + constant.getEndpointsGraph() + "> { "
                     + "                       ?provenance uc:fullName ?name . "
+                    + "                       FILTER (lang(?name) = \"es\")."
                     + "                  } "
                     + "              } "
                     + "          } "
@@ -454,6 +460,7 @@ public class ReportsImpl implements ReportsService {
                     + "  GRAPH <" + constant.getEndpointsGraph() + "> "
                     + "  { "
                     + "    ?provenance uc:fullName ?uni . "
+                    + "     FILTER (lang(?uni) = \"es\")."
                     + "  }"
                     + "} ORDER BY ?uni";
 
@@ -736,6 +743,7 @@ public class ReportsImpl implements ReportsService {
                     + "  GRAPH <" + constant.getEndpointsGraph() + ">  {"
                     + "    ?endpoint uc:name \"" + ies + "\"^^xsd:string ."
                     + "    ?endpoint uc:fullName ?name ."
+                    + " FILTER (lang(?name) = \"es\")."
                     + "  }"
                     + "}";
 
@@ -788,4 +796,77 @@ public class ReportsImpl implements ReportsService {
         }
         return new String[]{"", ""};
     }
+    
+    public String[] getJSONStatisticsTopKeywords(String hostname) {
+
+        String getQuery = "";
+        try {
+            //Query
+            getQuery = ConstantServiceImpl.PREFIX
+                    + " SELECT "
+                    + "  ?uriArea ?keyword ?total "
+                    + "WHERE "
+                    + "{  "
+                    + "	SELECT  ?keyword (IRI(REPLACE(?keyword, \" \", \"_\", \"i\")) as ?uriArea) ?total "
+                    + "    WHERE "
+                    + "	   { "
+                    + "    	{ "
+                    + "            SELECT DISTINCT ?keyword (COUNT(DISTINCT ?s) AS ?total) "
+                    + "            WHERE "
+                    + "            { "
+                    + "              GRAPH <http://ucuenca.edu.ec/wkhuska> "
+                    + "              { "
+                    + "                ?s foaf:publications ?publications. "
+                    + "                ?publications bibo:Quote ?keyword. "
+                    //+ "                #?s dct:subject ?keyword. "
+                    + "              } "
+                    + "            } "
+                    + "            GROUP BY ?keyword "
+                    + "            ORDER BY DESC(?total) "
+                    + "            LIMIT 10 "
+                    + "        } "
+                    + "        FILTER(!REGEX(?keyword,\"TESIS\")) "
+                    + "    } "
+                    + "} ";
+
+            Repository repo = new SPARQLRepository(hostname + "/sparql/select");
+            repo.initialize();
+            RepositoryConnection con = repo.getConnection();
+            try {
+                // perform operations on the connection
+                TupleQueryResult resulta = con.prepareTupleQuery(QueryLanguage.SPARQL, getQuery).evaluate();
+
+                JSONArray keywords = new JSONArray();
+                
+                String uri, key, total;
+                
+                while (resulta.hasNext()) {
+                    BindingSet binding = resulta.next();
+                    uri = String.valueOf(binding.getValue("uriArea")).replace("\"", "").replace("^^", "").split("<")[0];
+                    key = String.valueOf(binding.getValue("keyword")).replace("\"", "").replace("^^", "").split("<")[0];
+                    total = String.valueOf(binding.getValue("total")).replace("\"", "").replace("^^", "").split("<")[0];
+                    
+                    JSONObject keyword = new JSONObject();
+                    keyword.put("uri", uri);
+                    keyword.put("key", key);
+                    keyword.put("total", total);
+                    
+                    keywords.add(keyword);
+                }
+                con.close();
+                
+                return new String[]{keywords.toString(), ""};
+            } catch (RepositoryException ex) {
+                java.util.logging.Logger.getLogger(ReportsImpl.class.getName()).log(Level.SEVERE, null, ex);
+                con.close();
+            }
+
+            return new String[]{"", ""};
+        } catch (MalformedQueryException | QueryEvaluationException | RepositoryException ex) {
+            java.util.logging.Logger.getLogger(ReportsImpl.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
+        }
+        return new String[]{"", ""};
+    }
+    
 }
