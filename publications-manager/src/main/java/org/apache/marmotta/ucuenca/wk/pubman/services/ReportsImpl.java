@@ -538,10 +538,11 @@ public class ReportsImpl implements ReportsService {
             String title = "";
             String abst = "";
             String uri = "";
+            String universidad = "";
             Integer cont = 0;
             //Query
             getQuery = ConstantServiceImpl.PREFIX
-                    + "Select ?publicationUri (GROUP_CONCAT(distinct ?name;separator='; ') as ?names) ?title ?abstract ?uri "
+                    + "Select ?publicationUri (GROUP_CONCAT(distinct ?name;separator='; ') as ?names) ?title ?abstract ?uri ?provname "
                     + "WHERE "
                     + "{ "
                     + "  GRAPH <http://ucuenca.edu.ec/wkhuska> "
@@ -555,8 +556,20 @@ public class ReportsImpl implements ReportsService {
                     + "      FILTER (mm:fulltext-search(?quote, '" + keyword + "' )) . "
                     + "      BIND(REPLACE( '" + keyword + "', ' ', '_', 'i') AS ?key) . "
                     + "      BIND(IRI(?key) as ?keyword) "
+                    + "      ?subject dct:provenance ?provenance. "
+                    + "          { "
+                    + "             SELECT DISTINCT ?provenance (STR(?pname) as ?provname)"
+                    + "             WHERE"
+                    + "             {                                                                                                                                                                                                                                                                                                                     "
+                    + "                graph <http://ucuenca.edu.ec/wkhuska/endpoints> "
+                    + "                { "
+                    + "                  ?provenance uc:fullName ?pname. "
+                    + "                  FILTER (lang(?pname) = \"es\"). "
+                    + "                } "
+                    + "             } "
+                    + "		  }"
                     + "  } "
-                    + "} group by ?publicationUri ?title ?abstract ?uri ";
+                    + "} group by ?publicationUri ?title ?abstract ?uri ?provname";                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
 
             Repository repo = new SPARQLRepository(hostname + "/sparql/select");
             repo.initialize();
@@ -578,12 +591,14 @@ public class ReportsImpl implements ReportsService {
                     title = String.valueOf(binding.getValue("title")).replace("\"", "").replace("^^", "").split("<")[0];
                     abst = String.valueOf(binding.getValue("abstract")).replace("\"", "").replace("^^", "").split("<")[0];
                     uri = String.valueOf(binding.getValue("uri")).replace("\"", "").replace("^^", "").split("<")[0];
+                    universidad = String.valueOf(binding.getValue("provname")).replace("\"", "").replace("^^", "").split("<")[0];
 
                     publication.put("id", id);
                     publication.put("authors", authors);
                     publication.put("title", title);
                     publication.put("abstract", abst);
                     publication.put("uri", (uri == null || uri == "" || uri == "null") ? null : uri);
+                    publication.put("universidad", universidad);
 
                     publications.add(publication);
 

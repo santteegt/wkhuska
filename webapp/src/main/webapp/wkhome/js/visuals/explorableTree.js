@@ -381,13 +381,12 @@ explorableTree.directive('explorableTree', ['d3', 'globalData', 'sparqlQuery', '
                                     + ' ?pub dct:isPartOf ?isPartOf. '
                                     + ' ?pub bibo:numPages ?numPages. '
                                     + ' ?pub uc:origin ?origin. '
-                                    + ' ?pub uc:latindex ?latindex. '
                                     + ' } '
                                     + ' WHERE { graph <' + globalData.centralGraph + '> {  '
                                     + ' <' + nodeId + '> foaf:publications ?pub . '
                                     + '?pub dct:title ?title. '
-                                    + ' ?pub uc:origin ?origin. filter (!regex(?origin, "Latindex")). '
-                                    + ' OPTIONAL {?pub uc:origin ?latindex. filter (regex(?latindex, "Latindex")). } '
+                                    + ' ?pub uc:origin ?origin. '
+                                    + ' OPTIONAL {?pub uc:latindex ?latindex. } '
                                     + ' OPTIONAL {?pub bibo:abstract ?abstract. } '
                                     + ' OPTIONAL {?pub bibo:uri ?uri. } '
                                     + ' OPTIONAL {?pub dct:contributor ?contributor. } '
@@ -450,8 +449,7 @@ explorableTree.directive('explorableTree', ['d3', 'globalData', 'sparqlQuery', '
                     //view data in infoBar
                     var entity = _.findWhere(node.publication.jsonld["@graph"], {"@id": id, "@type": "bibo:Document"});
                     var model = {"dct:title": {label: "Titulo", containerType: "div"},
-                        "uc:latindex": {label: "Indexación: ", containerType: "div"},
-                        "uc:origin": {label: "Extraído de: ", containerType: "div"},
+                        "uc:origin": {label: "Indexado en: ", containerType: "div"},
                         "bibo:uri": {label: "URL: Link Externo", containerType: "a"},
                         "dct:contributor": {label: "CO-Autores - Links Externos: ", containerType: "a"},
                         "dct:isPartOf": {label: "Es parte de: ", containerType: "a"},

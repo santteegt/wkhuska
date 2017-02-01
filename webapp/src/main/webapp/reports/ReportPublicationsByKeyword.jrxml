@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.3.0.final using JasperReports Library version 6.3.0  -->
-<!-- 2016-07-28T12:07:05 -->
+<!-- Created with Jaspersoft Studio version 6.3.1.final using JasperReports Library version 6.3.1  -->
+<!-- 2017-01-31T21:21:05 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rpt" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="f4de0d5c-6142-4862-a203-a955ab44e6d2">
 	<property name="ireport.zoom" value="1.3310000000000004"/>
 	<property name="ireport.x" value="0"/>
@@ -13,6 +13,7 @@
 	<field name="title" class="java.lang.String"/>
 	<field name="abstract" class="java.lang.String"/>
 	<field name="uri" class="java.lang.String"/>
+	<field name="universidad" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -73,7 +74,7 @@
 		<band/>
 	</pageHeader>
 	<detail>
-		<band height="121">
+		<band height="142">
 			<textField>
 				<reportElement stretchType="RelativeToBandHeight" x="0" y="1" width="554" height="32" forecolor="#00055E" uuid="e3d66d4d-e00e-44e6-aaca-3035ce0ad351"/>
 				<textElement verticalAlignment="Middle">
@@ -91,23 +92,32 @@
 				<textFieldExpression><![CDATA["Abstract: " + $F{abstract}.replace("[\"", "").replace("\"]", "").replace("\",\"","; ")]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="1" y="117" width="553" height="1" uuid="90abc26e-de71-4147-a67c-1424431a277b"/>
+				<reportElement x="0" y="134" width="553" height="1" uuid="90abc26e-de71-4147-a67c-1424431a277b"/>
 			</line>
 			<textField>
-				<reportElement x="0" y="80" width="554" height="16" isRemoveLineWhenBlank="true" uuid="a1652e37-8c33-4b58-845a-58ce312c4607"/>
+				<reportElement x="0" y="81" width="554" height="16" isRemoveLineWhenBlank="true" uuid="a1652e37-8c33-4b58-845a-58ce312c4607"/>
 				<textElement>
 					<font size="9" pdfFontName="Helvetica-Bold"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Autores: " + $F{authors}.replace("[\"", "").replace("\"]", "").replace("\",\"","; ")]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="98" width="554" height="16" isRemoveLineWhenBlank="true" uuid="f2181122-4640-44bb-b9da-567369f5a192">
+				<reportElement x="-1" y="116" width="554" height="16" isRemoveLineWhenBlank="true" uuid="f2181122-4640-44bb-b9da-567369f5a192">
 					<printWhenExpression><![CDATA[$F{uri} != null && $F{uri} !=""]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="9" pdfFontName="Helvetica-Bold"/>
 				</textElement>
 				<textFieldExpression><![CDATA["URL: " + $F{uri}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="99" width="554" height="16" isRemoveLineWhenBlank="true" uuid="463e9f66-cdf0-48d7-9e96-17a77e86a95c">
+					<printWhenExpression><![CDATA[$F{universidad} != null && $F{universidad} !=""]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="9" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Institución: " + $F{universidad}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
