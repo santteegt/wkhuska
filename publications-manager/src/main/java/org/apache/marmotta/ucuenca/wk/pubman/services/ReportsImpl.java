@@ -166,14 +166,14 @@ public class ReportsImpl implements ReportsService {
                     // Get the Json with the all authors and a list of their publications from an specific IES.
                     json = getJSONPublicationsByAuthorsIES(params.get(0), hostname);
 
-                    parameters.put("universityFullName", json[0]);
-                    parameters.put("universityName", json[0]);
+                    parameters.put("universityFullName", json[1]);
+                    parameters.put("universityName", json[1]);
                     parameters.put("totalAuthors", json[2]);
 
                     break;
             }
             //Always the first element of the array has the json stream
-            stream = new ByteArrayInputStream(json[1].getBytes("UTF-8"));
+            stream = new ByteArrayInputStream(json[0].getBytes("UTF-8"));
             dataSource = new JsonDataSource(stream);
 
             if (dataSource != null) {
@@ -957,7 +957,7 @@ public class ReportsImpl implements ReportsService {
                 con.close();
                 //Number of authors
                 cont = publications.size();
-                return new String[]{universidad, authors.toString(), cont.toString()};
+                return new String[]{authors.toString(), universidad, cont.toString()};
             } catch (RepositoryException ex) {
                 java.util.logging.Logger.getLogger(ReportsImpl.class.getName()).log(Level.SEVERE, null, ex);
                 con.close();
