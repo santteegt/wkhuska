@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 /**
- * Created by . User: Thomas Kurz Date: 18.02.11 Time: 18:46 To change this
+ * Created by . User: Thomas Kurz Date: 18.02.11 Time: 18:46 To change this
  * template use File | Settings | File Templates.
  */
 (function ($) {
@@ -491,6 +491,3 @@ function runGetAuthorsFromUTPL(host) {
 
 
 }
-
-
-

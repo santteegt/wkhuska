@@ -34,6 +34,6 @@ public interface AuthorService {
      */
     String runAuthorsUpdateMultipleEP(String sparqlEndpoint, String graphUri) throws DaoException, UpdateException, QueryEvaluationException;
     
-    
+    String saveAuthorFromFile(String... args);
     
 }

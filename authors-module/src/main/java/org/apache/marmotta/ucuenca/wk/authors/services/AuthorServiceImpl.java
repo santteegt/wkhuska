@@ -346,6 +346,56 @@ public class AuthorServiceImpl implements AuthorService {
         }
         return "Error" + querytoUpdate;
     }
+    
+    @Override
+    public String saveAuthorFromFile(String... args) {
+        String output = "";
+        String graphUri = args[0];
+        String university = args[1];
+        String name = args[2];
+        String surname = args[3];
+        String keywords = null;
+        if (args[4] != null) {
+            keywords = args[4];
+        }
+        
+        String sujeto = "http://190.15.141.66:8899/" + university.toLowerCase() + "/contribuyente/" + surname.replace(" ", "_").toUpperCase() + "__" + name.replace(" ", "_").toUpperCase();
+        
+        //Type rdf:type person
+        String queryAuthorProvenanceInsert = buildInsertQuery(constantService.getAuthorsGraph(), sujeto, "dct:provenance", graphUri);
+        updateAuthor(queryAuthorProvenanceInsert);
+
+        //Type rdf:type person
+        String queryAuthorTypeInsert = buildInsertQuery(constantService.getAuthorsGraph(), sujeto, "rdf:type", "http://xmlns.com/foaf/0.1/Person");
+        updateAuthor(queryAuthorTypeInsert);
+        
+        //FirstName
+        String queryAuthorNameInsert = buildInsertQuery(constantService.getAuthorsGraph(), sujeto, "foaf:firstName ", " " + name + " ");
+        updateAuthor(queryAuthorNameInsert);
+        
+        //Lastname
+        String queryAuthorSurnameInsert = buildInsertQuery(constantService.getAuthorsGraph(), sujeto, "foaf:lastName ", " " + surname + " ");
+        updateAuthor(queryAuthorSurnameInsert);
+        
+        //FullName
+        String queryAuthorFullNameInsert = buildInsertQuery(constantService.getAuthorsGraph(), sujeto, "foaf:name", " " + surname + ", " + name + " ");
+        updateAuthor(queryAuthorFullNameInsert);
+        
+        //Source: File
+        String queryAuthorSourceInsert = buildInsertQuery(constantService.getAuthorsGraph(), sujeto, "<http://ucuenca.edu.ec/ontology#source>", " file ");
+        updateAuthor(queryAuthorSourceInsert);
+        
+        //Subjects Optional
+        if (keywords != null) {
+            String[] subjects = keywords.split(";");
+            for (String subject : subjects) {
+                String querySubjectInsert = buildInsertQuery(constantService.getAuthorsGraph(), sujeto, "dct:subject", " " + subject + " ");
+                updateAuthor(querySubjectInsert);
+            }
+        }        
+        
+        return output;
+    }
 
     /*
      *   ASK Query, to check if the resource already exists in temporal file  *.aut

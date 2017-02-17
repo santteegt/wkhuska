@@ -18,7 +18,13 @@
 package org.apache.marmotta.ucuenca.wk.authors.webservices;
 
 import com.google.common.io.CharStreams;
+import com.sun.jersey.multipart.FormDataParam;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,9 +41,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.marmotta.ucuenca.wk.authors.api.AuthorService;
 import org.apache.marmotta.ucuenca.wk.authors.api.EndpointService;
@@ -235,6 +243,90 @@ public class AuthorWebService {
 
     }
 
+    /**
+     *
+     */
+    @POST
+    @Path("/upload")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response uploadFile(
+            @FormDataParam("file") InputStream uploadedInputStream//, @FormDataParam("file") FormDataContentDisposition fileDetail
+            //, @FormParam("endpoint") String endpoint
+    ) {
+
+        String result = "";
+        String endpoint = "";
+        String endpointName = "";
+        
+        InputStreamReader inputStreamReader = new InputStreamReader(uploadedInputStream, StandardCharsets.UTF_8);
+
+        String line = "";
+        String cvsSplitBy = ",";
+        int cont = 0;
+        String saveAuthor = null;
+        int contEPName = -1;
+        
+        try {
+            BufferedReader br = new BufferedReader(inputStreamReader);
+            line = br.readLine();
+            while (line != null) {
+                int two = 2;
+                if (line.contains("endpointName")) {
+                    contEPName = cont + 2; 
+                }
+                if (cont == contEPName) {
+                    endpointName = line;
+                }
+                if (line.contains("http://")) {
+                    endpoint = line;
+                } else if (line.split(cvsSplitBy).length >= two)
+                // use comma as separator
+                {
+                    result += line + "\n";
+                }
+                cont++;
+                line = br.readLine();
+            }
+            
+            BufferedReader reader = new BufferedReader(new StringReader(result));
+            line = reader.readLine();
+            while (line != null) {
+                String[] researcher = line.split(cvsSplitBy);
+                String keywords = null;
+
+                int size = researcher.length;
+                int two = 2;
+                if (size > two) {
+                    //Separate the keywords
+                    keywords = researcher[2];
+                }
+
+                saveAuthor = authorService.saveAuthorFromFile(endpoint, endpointName, researcher[0], researcher[1], keywords);
+                line = reader.readLine();
+            }
+            
+
+            if (br != null) {
+                br.close();
+            }
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(AuthorWebService.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //Prepare output message
+        String output = "";
+        if ("".equals(result)){
+            output = "File not in the correct format.";
+        } else {
+            output = "Resultado: " + saveAuthor;
+        }
+
+        return Response.status(200).entity(output).build();
+
+    }
+    
+    
+    
+    
     /**
      * AUTHOR UPDATE IMPLEMENTATION
      *

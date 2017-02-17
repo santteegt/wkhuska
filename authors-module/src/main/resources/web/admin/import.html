@@ -1,0 +1,57 @@
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <!--###BEGIN_HEAD###-->
+        <title>Importer</title>
+        <script type="text/javascript" src="../../webjars/jquery/1.8.2/jquery.min.js"></script>
+        <script type="text/javascript" src="../../webjars/marmotta.js"></script>
+        <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular.min.js"></script>
+        <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular-resource.min.js"></script>
+        <!--script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script-->
+        <script type="text/javascript" src="js/widgets/importAuthors.js"></script>
+
+        <!--###END_HEAD###-->
+    </head>
+    <body>
+        <!--###BEGIN_CONTENT###-->
+        <div ng-app = "myApp">
+            <h1>Authors Import</h1>
+            <h2>File Structure</h2>
+            <p>The file to be uploaded has to be formatted as a CSV file, with each row corresponding to a researcher and separated by commas.  
+                The first field has to be the surname of the researcher. The second field has to be the given names and finally the third field
+                could be void or a list of topics (or research areas) where the researcher works; separated by semi-colons.
+            </p>
+            
+            <form ng-controller = "myCtrl">
+                
+                <label>Select a CSV File: <input type = "file" file-model="myFile"/><button ng-click = "uploadFile()">Upload File</button></label>
+                <p>{{myFile.name}}</p>
+                <label>Select an Endpoint: <select ng-model="selectedEndpoint" ng-options="endpoint.name for endpoint in endpoints"></select></label>
+                <!--ul>
+                        <li ng-repeat="endpoint in endpoints  ">{{endpoint.id}} - {{endpoint.name}}</li>
+                </ul-->
+            </form>
+            
+        </div>
+        <!--###END_CONTENT###-->
+    </body>
+</html>
