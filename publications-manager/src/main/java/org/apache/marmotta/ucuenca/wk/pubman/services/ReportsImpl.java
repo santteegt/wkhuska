@@ -162,6 +162,15 @@ public class ReportsImpl implements ReportsService {
                     json = getJSONStatisticsTopKeywords(hostname);
 
                     break;
+                case "ReportAuthor_sPublicationsByIES":
+                    // Get the Json with the all authors and a list of their publications from an specific IES.
+                    json = getJSONPublicationsByAuthorsIES(params.get(0), hostname);
+
+                    parameters.put("universityFullName", json[1]);
+                    parameters.put("universityName", json[1]);
+                    parameters.put("totalAuthors", json[2]);
+
+                    break;
             }
             //Always the first element of the array has the json stream
             stream = new ByteArrayInputStream(json[0].getBytes("UTF-8"));
@@ -864,6 +873,91 @@ public class ReportsImpl implements ReportsService {
                 con.close();
 
                 return new String[]{keywords.toString(), ""};
+            } catch (RepositoryException ex) {
+                java.util.logging.Logger.getLogger(ReportsImpl.class.getName()).log(Level.SEVERE, null, ex);
+                con.close();
+            }
+
+            return new String[]{"", ""};
+        } catch (MalformedQueryException | QueryEvaluationException | RepositoryException ex) {
+            java.util.logging.Logger.getLogger(ReportsImpl.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
+        }
+        return new String[]{"", ""};
+    }
+    
+    /**
+     * Extract Json with publications of authors 
+     *
+     * @param keyword Keyword to search
+     * @param hostname Hostname
+     * @return Array of strings
+     */
+    public String[] getJSONPublicationsByAuthorsIES(String ies, String hostname) {
+        String getQuery = "";
+        try {
+            //Variables to return with name and number of publications
+            String name = "";
+            String title = "";
+            String universidad = "";
+            Integer cont = 0;
+            //Query
+            getQuery = ConstantServiceImpl.PREFIX
+                    + "SELECT distinct ?name ?title ?fullName "
+                    + "WHERE {  "
+                    + "  GRAPH <" + constant.getWkhuskaGraph() + ">  { "
+                    + "    ?author foaf:publications ?publication ;"
+                    + "            dct:provenance ?endpoint ."
+                    + "    ?publication dct:title ?title."
+                    + "    ?author foaf:name ?name ."
+                    + "    {"
+                    + "      SELECT ?endpoint ?fullName {"
+                    + "        GRAPH <" + constant.getEndpointsGraph() + "> {"
+                    + "          ?endpoint uc:name ?nameIES ."
+                    + "          ?endpoint uc:fullName ?fullName . "
+                    + "          FILTER(STR(?nameIES)=\"" + ies + "\"). "
+                    + "          FILTER(lang(?fullName)=\"es\") "
+                    + "        }"
+                    + "      }"
+                    + "    }"
+                    + "  }"
+                    + "}  "
+                    + "ORDER BY Asc(?name)";                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+
+            Repository repo = new SPARQLRepository(hostname + "/sparql/select");
+            repo.initialize();
+            RepositoryConnection con = repo.getConnection();
+            try {
+                // perform operations on the connection
+                TupleQueryResult resulta = con.prepareTupleQuery(QueryLanguage.SPARQL, getQuery).evaluate();
+
+                JSONArray authors = new JSONArray();
+                JSONObject author = new JSONObject();
+                JSONArray publications = new JSONArray();
+                JSONObject publication = new JSONObject();
+
+                while (resulta.hasNext()) {
+                    BindingSet binding = resulta.next();
+                    //Form the Json object
+                    publication = new JSONObject();
+
+                    name = String.valueOf(binding.getValue("name")).replace("\"", "").replace("^^", "").split("<")[0];
+                    title = String.valueOf(binding.getValue("title")).replace("\"", "").replace("^^", "").split("<")[0];
+                    universidad = String.valueOf(binding.getValue("fullName")).replace("\"", "").replace("^^", "").split("@")[0];
+                    
+                    author = new JSONObject();
+                    author.put("name", name);
+                    author.put("title", title);
+                    author.put("universidad", universidad);
+
+                    authors.add(author);
+
+                }
+
+                con.close();
+                //Number of authors
+                cont = publications.size();
+                return new String[]{authors.toString(), universidad, cont.toString()};
             } catch (RepositoryException ex) {
                 java.util.logging.Logger.getLogger(ReportsImpl.class.getName()).log(Level.SEVERE, null, ex);
                 con.close();
