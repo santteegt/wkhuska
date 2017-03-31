@@ -359,7 +359,7 @@ public class AuthorServiceImpl implements AuthorService {
             keywords = args[4];
         }
         
-        String sujeto = "http://190.15.141.66:8899/" + university.toLowerCase() + "/contribuyente/" + surname.replace(" ", "_").toUpperCase() + "__" + name.replace(" ", "_").toUpperCase();
+        String sujeto = "http://ucuenca.edu.ec/resource/author/" + (surname.replace(" ", "_").toUpperCase() + "__" + name.replace(" ", "_").toUpperCase()).replace(".", "");
         
         //Type rdf:type person
         String queryAuthorProvenanceInsert = buildInsertQuery(constantService.getAuthorsGraph(), sujeto, "dct:provenance", graphUri);
