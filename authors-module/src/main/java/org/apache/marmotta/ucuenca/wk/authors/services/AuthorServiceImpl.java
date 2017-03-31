@@ -351,7 +351,7 @@ public class AuthorServiceImpl implements AuthorService {
     public String saveAuthorFromFile(String... args) {
         String output = "";
         String graphUri = args[0];
-        String university = args[1];
+        //String university = args[1];
         String name = args[2];
         String surname = args[3];
         String keywords = null;
