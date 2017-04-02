@@ -370,15 +370,15 @@ public class AuthorServiceImpl implements AuthorService {
         updateAuthor(queryAuthorTypeInsert);
         
         //FirstName
-        String queryAuthorNameInsert = buildInsertQuery(constantService.getAuthorsGraph(), sujeto, "foaf:firstName ", " " + name + " ");
+        String queryAuthorNameInsert = buildInsertQuery(constantService.getAuthorsGraph(), sujeto, "foaf:firstName ", "" + name + "");
         updateAuthor(queryAuthorNameInsert);
         
         //Lastname
-        String queryAuthorSurnameInsert = buildInsertQuery(constantService.getAuthorsGraph(), sujeto, "foaf:lastName ", " " + surname + " ");
+        String queryAuthorSurnameInsert = buildInsertQuery(constantService.getAuthorsGraph(), sujeto, "foaf:lastName ", "" + surname + "");
         updateAuthor(queryAuthorSurnameInsert);
         
         //FullName
-        String queryAuthorFullNameInsert = buildInsertQuery(constantService.getAuthorsGraph(), sujeto, "foaf:name", " " + surname + ", " + name + " ");
+        String queryAuthorFullNameInsert = buildInsertQuery(constantService.getAuthorsGraph(), sujeto, "foaf:name", "" + surname + ", " + name + "");
         updateAuthor(queryAuthorFullNameInsert);
         
         //Source: File
@@ -389,7 +389,7 @@ public class AuthorServiceImpl implements AuthorService {
         if (keywords != null) {
             String[] subjects = keywords.split(";");
             for (String subject : subjects) {
-                String querySubjectInsert = buildInsertQuery(constantService.getAuthorsGraph(), sujeto, "dct:subject", " " + subject.trim() + " ");
+                String querySubjectInsert = buildInsertQuery(constantService.getAuthorsGraph(), sujeto, "dct:subject",  subject.trim() + "");
                 updateAuthor(querySubjectInsert);
             }
         }        
