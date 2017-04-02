@@ -352,11 +352,11 @@ public class AuthorServiceImpl implements AuthorService {
         String output = "";
         String graphUri = args[0];
         //String university = args[1];
-        String name = args[2];
-        String surname = args[3];
+        String name = args[2].trim();
+        String surname = args[3].trim();
         String keywords = null;
         if (args[4] != null) {
-            keywords = args[4];
+            keywords = args[4].trim();
         }
         
         String sujeto = "http://ucuenca.edu.ec/resource/author/" + (surname.replace(" ", "_").toUpperCase() + "__" + name.replace(" ", "_").toUpperCase()).replace(".", "");
@@ -389,7 +389,7 @@ public class AuthorServiceImpl implements AuthorService {
         if (keywords != null) {
             String[] subjects = keywords.split(";");
             for (String subject : subjects) {
-                String querySubjectInsert = buildInsertQuery(constantService.getAuthorsGraph(), sujeto, "dct:subject", " " + subject + " ");
+                String querySubjectInsert = buildInsertQuery(constantService.getAuthorsGraph(), sujeto, "dct:subject", " " + subject.trim() + " ");
                 updateAuthor(querySubjectInsert);
             }
         }        
