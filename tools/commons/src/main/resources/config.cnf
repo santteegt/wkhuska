@@ -3,6 +3,8 @@
 	"dbSchema":"cache",
 	"dbUser":"marmotta",
 	"dbPassword":"marmotta",
+        "CacheFile": "data.db",
+        "DistanceFile": "distance.db",
 	"contextQuery":"select distinct ?d where { {<|?|> <http://rdaregistry.info/Elements/a/P50195> ?b } union { <|?|> <http://rdaregistry.info/Elements/a/P50161> ?b } union { ?b <http://purl.org/dc/terms/contributor> <|?|>} union { ?b <http://purl.org/dc/terms/creator> <|?|>} . { ?b <http://schema.org/mentions> ?c . ?c <http://purl.org/saws/ontology#refersTo> ?d . } UNION { ?b <http://purl.org/dc/terms/subject> ?d } UNION { ?b <http://vivoweb.org/ontology/core#freetextKeyword> ?d } . filter (isLiteral (?d)) }",
 	"stopwords":["development","using","method","implementation","promas","wine","white","university","ecuador","republic of ecuador","resources","expertise","-5","inform","quito","ecuadorian","fen? am main","inform crime? tico","ecuatorianidad","fen? am main","cuenca (ecuador)","sigsig","cuenca-ecuador","san bartolomé","cuenca, ecuador"]
 }

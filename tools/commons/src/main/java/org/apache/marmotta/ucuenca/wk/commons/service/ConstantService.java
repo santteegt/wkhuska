@@ -28,7 +28,8 @@ public interface ConstantService {
             + " PREFIX mm: <http://marmotta.apache.org/vocabulary/sparql-functions#> "
             + " PREFIX uc: <http://ucuenca.edu.ec/ontology#> "
             + " PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "
-            + " PREFIX bibo: <http://purl.org/ontology/bibo/> ";
+            + " PREFIX bibo: <http://purl.org/ontology/bibo/> "
+            + " PREFIX dc: <http://purl.org/dc/elements/1.1/> ";
 
     String getBaseURI();
 

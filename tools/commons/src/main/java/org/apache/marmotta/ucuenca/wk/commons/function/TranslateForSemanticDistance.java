@@ -27,11 +27,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -45,23 +41,22 @@ import java.util.logging.Logger;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.io.IOUtils;
-import org.apache.marmotta.ucuenca.wk.commons.impl.CommonsServicesImpl;
-import org.apache.marmotta.ucuenca.wk.commons.service.CommonsServices;
 
 /**
  *
  * @author FernandoBac
+ * @author Jose Cullcay
  */
 public class TranslateForSemanticDistance {
 
     // JDBC driver name and database URL
     private String dburl = "";
     //  Database credentials
-    private String user = "";
-    private String pass = "";
-    private CommonsServices commonservices = new CommonsServicesImpl();
+    //private String user = "";
+    //private String pass = "";
+    //private CommonsServices commonservices = new CommonsServicesImpl();
 
-    private Connection conn = null;
+    //private Connection conn = null;
     //Statement stmt = null;
 
     private JsonObject config = null;
@@ -73,6 +68,8 @@ public class TranslateForSemanticDistance {
     private LanguageDetector languageDetector = LanguageDetectorBuilder.create(NgramExtractors.standard())
                     .withProfiles(languageProfiles)
                     .build();
+    
+    //private Cache cache = Cache.getInstance();
 
     public TranslateForSemanticDistance() throws IOException, ClassNotFoundException {
         JsonParser parser = new JsonParser();
@@ -82,8 +79,8 @@ public class TranslateForSemanticDistance {
 
         config = parser.parse(theString).getAsJsonObject();
         dburl = dburl + config.get("dbServer").getAsString() + "/" + config.get("dbSchema").getAsString();
-        user = config.get("dbUser").getAsString();
-        pass = config.get("dbPassword").getAsString();
+        //user = config.get("dbUser").getAsString();
+        //pass = config.get("dbPassword").getAsString();
 
     }
 
@@ -92,8 +89,10 @@ public class TranslateForSemanticDistance {
     }
 
     public List<String> traductor(List<String> join) throws SQLException, IOException, ClassNotFoundException {
-        Class.forName("org.postgresql.Driver");
-        conn = DriverManager.getConnection(dburl, user, pass);
+        //Class.forName("org.postgresql.Driver");
+        //conn = DriverManager.getConnection(dburl, user, pass);
+        Cache cache = Cache.getInstance();
+        //Logger.getLogger(TranslateForSemanticDistance.class.getName()).log(Level.INFO, "Estado de la coneccion a la Base de datos Traductor: Cerrada:" + (conn != null? conn.isClosed(): "null") + " URL: " + dburl + "User: " + user + ". Pass: " + pass );
         List<String> ls = new ArrayList();
         for (String w : join) {
             String translated = "";
@@ -101,7 +100,7 @@ public class TranslateForSemanticDistance {
             String english = "en";
             if (!english.equals(language)) {
             
-                Statement stmt = conn.createStatement();
+                /*Statement stmt = conn.createStatement();
                 String sql;
                 sql = "SELECT * FROM translation where translation.word='" + w.trim() + "'";
                 java.sql.ResultSet rs;
@@ -110,9 +109,22 @@ public class TranslateForSemanticDistance {
                     rs = stmt.executeQuery(sql);
                 } catch (SQLException ex) {
                     rs = null;
+                    Logger.getLogger(TranslateForSemanticDistance.class.getName()).log(Level.SEVERE, "Error while executing the sql: " + sql + ". Message Translator: " + ex.getMessage() );
+                }*/
+                
+                translated = cache.get(w.toLowerCase());
+                
+                if (translated==null) {
+                    translated = traductorBing(w.trim()).trim().toLowerCase();
+                    if (translated.equals(w.trim().toLowerCase())) {
+                        translated = traductorYandex(w.trim()).toLowerCase();
+                    }
+                    
+                    cache.put(w.toLowerCase(), translated);
+                    
                 }
                 
-                if (rs != null) {
+                /*if (rs != null) {
                     if (rs.next()) {
                         translated = rs.getString("value");
                         rs.close();
@@ -139,14 +151,15 @@ public class TranslateForSemanticDistance {
                     if (translated.equals(w.trim())) {
                         translated = traductorBing(w.trim()).trim().toLowerCase();
                     }
-                }
+                }*/
             }
             else {
-                translated = w.trim();
+                translated = w.trim().toLowerCase();
             }
             ls.add(translated.trim().toLowerCase());
         }
-        conn.close();
+//        conn.close();
+        cache.kill();
         return ls;
     }
     
@@ -199,7 +212,7 @@ public class TranslateForSemanticDistance {
                 e.printStackTrace(new PrintStream(System.out));
 
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(400);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(SemanticDistance.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -251,19 +264,29 @@ public class TranslateForSemanticDistance {
     }
 
     private synchronized String http2(String s, Map<String, String> mp) throws SQLException, IOException {
-        String md = s + mp.toString();
+        /*String md = s + mp.toString();
         Statement stmt = conn.createStatement();
         String sql;
         sql = "SELECT * FROM cache where cache.key='" + commonservices.getMD5(md) + "'";
-        java.sql.ResultSet rs = stmt.executeQuery(sql);
+        Logger.getLogger(TranslateForSemanticDistance.class.getName()).log(Level.INFO, "Estado de la coneccion a la Base de datos http2: Cerrada:" + conn.isClosed() + " URL: " + dburl + "User: " + user + ". Pass: " + pass );
+        java.sql.ResultSet rs;
+                
+        try {
+            rs = stmt.executeQuery(sql);
+        } catch (SQLException ex) {
+            rs = null;
+            Logger.getLogger(TranslateForSemanticDistance.class.getName()).log(Level.SEVERE, "Error while executing the sql in http2: " + sql + ". Message Translator: " + ex.getMessage() );
+            
+        }*/
+        
         String resp = "";
-        if (rs.next()) {
+        /*if (rs!= null &&rs.next()) {
             resp = rs.getString("value");
             rs.close();
             stmt.close();
         } else {
             rs.close();
-            stmt.close();
+            stmt.close();*/
 
             HttpClient client = new HttpClient();
             PostMethod method = new PostMethod(s);
@@ -282,7 +305,7 @@ public class TranslateForSemanticDistance {
                     resp += line + "\n";
                 }
                 reader.close();
-                try {
+                /*try {
                     JsonParser parser = new JsonParser();
                     parser.parse(resp);
                     PreparedStatement stmt2 = conn.prepareStatement("INSERT INTO cache (key, value) values (?, ?)");
@@ -291,9 +314,10 @@ public class TranslateForSemanticDistance {
                     stmt2.executeUpdate();
                     stmt2.close();
                 } catch (Exception e) {
-                }
+                    Logger.getLogger(TranslateForSemanticDistance.class.getName()).log(Level.SEVERE, "Error in the http2 Insert Function. Used by TraductorYandex. Possibly the database." + e.getMessage() );
+                }*/
             }
-        }
+        //}
 
         return resp;
     }
