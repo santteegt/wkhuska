@@ -39,7 +39,8 @@ public class GetAuthorsGraphDataImpl implements GetAuthorsGraphData {
 
     private CommonsServices commonService = new CommonsServicesImpl();
 
-    private ConstantService constantService = new ConstantServiceImpl();
+    @Inject
+    private ConstantService constantService;
 
     private DistanceService distanceService = new DistanceServiceImpl();
 

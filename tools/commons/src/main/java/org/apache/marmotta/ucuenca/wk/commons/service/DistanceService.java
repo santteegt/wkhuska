@@ -30,4 +30,7 @@ public interface DistanceService {
     Double semanticComparisonValue(List<String> listA, List<String> listB);
 
     double cosineSimilarityAndLevenshteinDistance(String param1, String param2);
+    
+    float jaccardDistance(String param1, String param2);
+    
 }

@@ -13,11 +13,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
+//import java.sql.Connection;
+//import java.sql.DriverManager;
+//import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
+//import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,8 +30,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 
-import org.apache.marmotta.ucuenca.wk.commons.impl.CommonsServicesImpl;
-import org.apache.marmotta.ucuenca.wk.commons.service.CommonsServices;
+//import org.apache.marmotta.ucuenca.wk.commons.impl.CommonsServicesImpl;
+//import org.apache.marmotta.ucuenca.wk.commons.service.CommonsServices;
 
 /**
  *
@@ -41,12 +41,13 @@ public class SemanticDistance {
 
     // JDBC driver name and database URL
     private String dburl = "";
+    private final TranslateForSemanticDistance trans = new TranslateForSemanticDistance();
     //  Database credentials
-    private String user = "";
-    private String pass = "";
-    private CommonsServices commonservices = new CommonsServicesImpl();
+    //private String user = "";
+    //private String pass = "";
+    //private CommonsServices commonservices = new CommonsServicesImpl();
 
-    private Connection conn = null;
+    //private Connection conn = null;
     //Statement stmt = null;
 
     public SemanticDistance() throws IOException, ClassNotFoundException {
@@ -57,8 +58,8 @@ public class SemanticDistance {
         String theString = IOUtils.toString(resourceAsStream, Charset.defaultCharset().toString());
         config = parser.parse(theString).getAsJsonObject();
         dburl = dburl + config.get("dbServer").getAsString() + "/" + config.get("dbSchema").getAsString();
-        user = config.get("dbUser").getAsString();
-        pass = config.get("dbPassword").getAsString();
+        //user = config.get("dbUser").getAsString();
+        //pass = config.get("dbPassword").getAsString();
 
     }
 
@@ -70,8 +71,8 @@ public class SemanticDistance {
      * @param args the command line arguments
      */
     public synchronized double semanticKeywordsDistance(List<String> a, List<String> b) throws ClassNotFoundException, SQLException, IOException {
-        Class.forName("org.postgresql.Driver");
-        conn = DriverManager.getConnection(dburl, user, pass);
+        //Class.forName("org.postgresql.Driver");
+        //conn = DriverManager.getConnection(dburl, user, pass);
         ConcurrentHashMap<String, List<String>> map = new ConcurrentHashMap<>();
         List<String> authors = new ArrayList();
         authors.add("a1");
@@ -120,7 +121,7 @@ public class SemanticDistance {
             }
         }
 
-        conn.close();
+        //conn.close();
         return mapEntry(result);
     }
     
@@ -128,8 +129,8 @@ public class SemanticDistance {
      * @param args the command line arguments
      */
     public synchronized double nwdDistance(List<String> a, List<String> b) throws ClassNotFoundException, SQLException, IOException {
-        Class.forName("org.postgresql.Driver");
-        conn = DriverManager.getConnection(dburl, user, pass);
+        //Class.forName("org.postgresql.Driver");
+        //conn = DriverManager.getConnection(dburl, user, pass);
         ConcurrentHashMap<String, List<String>> map = new ConcurrentHashMap<>();
         List<String> authors = new ArrayList();
         authors.add("a1");
@@ -185,7 +186,7 @@ public class SemanticDistance {
             }
         }
 
-        conn.close();
+        //conn.close();
         return mapEntry(result);
     }
 
@@ -217,7 +218,7 @@ public class SemanticDistance {
     }
 
     private List<String> formatList(List<String> a) throws SQLException, IOException, ClassNotFoundException {
-        TranslateForSemanticDistance trans = new TranslateForSemanticDistance();
+        //TranslateForSemanticDistance trans = new TranslateForSemanticDistance();
         a = trans.traductor(a);//new LinkedList<String>(java.util.Arrays.asList(t1_.split("\\s\\|\\s")));
         a = trans.clean(a);
             a = topT(a, (int) (2.0 * Math.log(a.size())));
@@ -225,7 +226,7 @@ public class SemanticDistance {
     }
     
     private List<String> formatList(List<String> a, Integer top) throws SQLException, IOException, ClassNotFoundException {
-        TranslateForSemanticDistance trans = new TranslateForSemanticDistance();
+        //TranslateForSemanticDistance trans = new TranslateForSemanticDistance();
         a = trans.traductor(a);//new LinkedList<String>(java.util.Arrays.asList(t1_.split("\\s\\|\\s")));
         a = trans.clean(a);
         if (top == 0) {
@@ -274,39 +275,79 @@ public class SemanticDistance {
     }
 
     private double ngd(String a, String b) throws IOException, SQLException {
-        int min = 0;
-        int min2 = 1;
-        a = a.trim();
-        b = b.trim();
-
-        if (a.compareToIgnoreCase(b) == min) {
-            return 0;
+        /*
+        Statement stmt = conn.createStatement();
+        String sql;
+        sql = "SELECT * FROM distance where ((distance.\"firstWord\"='" + a + "' and distance.\"secondWord\"='" + b + "') or (distance.\"firstWord\"='" + b + "' and distance.\"secondWord\"='" + a + "'))";
+        //log.info("Estado de la coneccion a la Base de datos http2: Cerrada:" + conn.isClosed() + " URL: " + dburl + "User: " + user + ". Pass: " + pass );
+        java.sql.ResultSet rs;
+                
+        try {
+            rs = stmt.executeQuery(sql);
+            return rs.getDouble("coefficient");
+        } catch (Exception ex) {
+            rs = null;
+            //log.error("Error while executing the sql in http2: " + sql + ". Message Translator: " + ex.getMessage() );
         }
+        */
+        
+        Cache cache = Cache.getInstance();
+        
+        Double dist = cache.getDistance(a, b);
+        
+        if (dist == null) {
+            int min = 0;
+            int min2 = 1;
+            a = a.trim();
+            b = b.trim();
 
-        //double n0 = getResultsCount(""+a+"");
-        //double n1 = getResultsCount(""+b+"");
-        //String c = ""+a+" "+b+"";
-        double n0 = getResultsCount("\"" + a + "\"~10");
-        double n1 = getResultsCount("\"" + b + "\"~10");
-        String c = "\"" + a + " " + b + "\"~50";
+            if (a.compareToIgnoreCase(b) == min) {
+                return 0;
+            }
 
-        double n2 = getResultsCount(c);
-        double m = 5029469;
-        double distance = 0;
-        int measure = 0;
-        double l1 = Math.max(Math.log10(n0), Math.log10(n1)) - Math.log10(n2);
-        double l2 = Math.log10(m) - Math.min(Math.log10(n0), Math.log10(n1));
+            //double n0 = getResultsCount(""+a+"");
+            //double n1 = getResultsCount(""+b+"");
+            //String c = ""+a+" "+b+"";
+            double n0 = getResultsCount("\"" + a + "\"~10");
+            double n1 = getResultsCount("\"" + b + "\"~10");
+            String c = "\"" + a + " " + b + "\"~50";
 
-        if (measure == min) {
-            distance = l1 / l2;
+            double n2 = getResultsCount(c);
+            double m = 5029469;
+            double distance = 0;
+            int measure = 0;
+            double l1 = Math.max(Math.log10(n0), Math.log10(n1)) - Math.log10(n2);
+            double l2 = Math.log10(m) - Math.min(Math.log10(n0), Math.log10(n1));
+
+            if (measure == min) {
+                distance = l1 / l2;
+            }
+            if (measure == min2) {
+                distance = 1 - (Math.log10(n2) / Math.log10(n0 + n1 - n2));
+            }
+            if (n0 == min || n1 == min || n2 == min) {
+                distance = 1;
+            }
+            
+            cache.putDistance(a, b, distance);
+            cache.kill();
+            return distance;
+        } else {
+            cache.kill();
+            return dist;
         }
-        if (measure == min2) {
-            distance = 1 - (Math.log10(n2) / Math.log10(n0 + n1 - n2));
+        /*
+        try {
+            PreparedStatement stmt2 = conn.prepareStatement("INSERT INTO distance (firstWord, secondWord, coefficient) values (?, ?, ?)");
+            stmt2.setString(1, a);
+            stmt2.setString(2, b);
+            stmt2.setDouble(3, distance);
+            stmt2.executeUpdate();
+            stmt2.close();
+        } catch (Exception e) {
+            //log.error("Error in the http2 Insert Function. Used by TraductorYandex. Possibly the database." + e.getMessage());
         }
-        if (n0 == min || n1 == min || n2 == min) {
-            distance = 1;
-        }
-        return distance;
+        */
     }
 
     private double getResultsCount(String query) throws IOException, SQLException {
@@ -356,18 +397,18 @@ public class SemanticDistance {
 
     private synchronized String http(String s) throws SQLException, IOException {
 
-        Statement stmt = conn.createStatement();
-        String sql;
-        sql = "SELECT * FROM cache where cache.key='" + commonservices.getMD5(s) + "'";
-        java.sql.ResultSet rs = stmt.executeQuery(sql);
+        //Statement stmt = conn.createStatement();
+        //String sql;
+        //sql = "SELECT * FROM cache where cache.key='" + commonservices.getMD5(s) + "'";
+        //java.sql.ResultSet rs = stmt.executeQuery(sql);
         String resp = "";
-        if (rs.next()) {
+        /*if (rs.next()) {
             resp = rs.getString("value");
             rs.close();
             stmt.close();
         } else {
             rs.close();
-            stmt.close();
+            stmt.close();*/
             final URL url = new URL(s);
             final URLConnection connection = url.openConnection();
             connection.setConnectTimeout(60000);
@@ -381,7 +422,7 @@ public class SemanticDistance {
             }
             reader.close();
 
-            try {
+            /*try {
                 JsonParser parser = new JsonParser();
                 parser.parse(resp);
                 PreparedStatement stmt2 = conn.prepareStatement("INSERT INTO cache (key, value) values (?, ?)");
@@ -392,7 +433,7 @@ public class SemanticDistance {
             } catch (Exception e) {
 
             }
-        }
+        }*/
 
         return resp;
     }

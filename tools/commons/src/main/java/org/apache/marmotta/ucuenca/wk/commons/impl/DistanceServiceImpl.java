@@ -22,6 +22,7 @@ import org.simmetrics.simplifiers.Simplifiers;
 import org.simmetrics.tokenizers.Tokenizers;
 import org.simmetrics.StringMetric;
 import static org.simmetrics.StringMetricBuilder.with;
+import org.simmetrics.metrics.JaccardSimilarity;
 
 /**
  *
@@ -33,11 +34,22 @@ public class DistanceServiceImpl implements DistanceService {
     private org.slf4j.Logger log;
 
     private CommonsServices commonService = new CommonsServicesImpl();
+    private SemanticDistance dist = null;
+
+    public DistanceServiceImpl() {
+        try {
+            this.dist = new SemanticDistance();
+        } catch (IOException ex) {
+            Logger.getLogger(DistanceServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(DistanceServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
     @Override
     public boolean semanticComparison(List<String> listA, List<String> listB) {
         try {
-            SemanticDistance dist = new SemanticDistance();
+            //SemanticDistance dist = new SemanticDistance();
             double value = dist.semanticKeywordsDistance(listA, listB);
 
             double semthreshold = Double.parseDouble(commonService.readPropertyFromFile("parameters.properties", "semanticDistanceListAListB"));
@@ -54,7 +66,7 @@ public class DistanceServiceImpl implements DistanceService {
     @Override
     public Double semanticComparisonValue(List<String> listA, List<String> listB) {
         try {
-            SemanticDistance dist = new SemanticDistance();
+            //SemanticDistance dist = new SemanticDistance();
             return dist.nwdDistance(listA, listB); //double value = dist.semanticKeywordsDistance(listA, listB);
 
         } catch (IOException | ClassNotFoundException | SQLException ex) {
@@ -125,6 +137,17 @@ public class DistanceServiceImpl implements DistanceService {
         float similarity = (float) ((compare + compare2) / 2.0);
 
         return similarity;
+    }
+    
+    @Override
+    public float jaccardDistance(String param1, String param2) {
+        StringMetric metric2
+                = with(new JaccardSimilarity<String>())
+                .simplify(Simplifiers.removeDiacritics())
+                .simplify(Simplifiers.toLowerCase())
+                .tokenize(Tokenizers.qGram(2)).tokenizerCache().build();
+
+        return metric2.compare(param1, param2);
     }
 
 }
