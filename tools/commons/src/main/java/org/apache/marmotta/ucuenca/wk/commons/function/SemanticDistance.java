@@ -291,7 +291,8 @@ public class SemanticDistance {
         }
         */
         
-        Cache cache = Cache.getInstance();
+        Cache cache = new Cache();
+        cache.getInstanceDBDistance();
         
         Double dist = cache.getDistance(a, b);
         

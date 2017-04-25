@@ -91,16 +91,18 @@ public class TranslateForSemanticDistance {
     public List<String> traductor(List<String> join) throws SQLException, IOException, ClassNotFoundException {
         //Class.forName("org.postgresql.Driver");
         //conn = DriverManager.getConnection(dburl, user, pass);
-        Cache cache = Cache.getInstance();
+        Cache cache = new Cache();
+        cache.getInstanceDB();
         //Logger.getLogger(TranslateForSemanticDistance.class.getName()).log(Level.INFO, "Estado de la coneccion a la Base de datos Traductor: Cerrada:" + (conn != null? conn.isClosed(): "null") + " URL: " + dburl + "User: " + user + ". Pass: " + pass );
         List<String> ls = new ArrayList();
-        for (String w : join) {
-            String translated = "";
-            String language = detectLanguage(w);
-            String english = "en";
-            if (!english.equals(language)) {
-            
-                /*Statement stmt = conn.createStatement();
+        try {
+            for (String w : join) {
+                String translated = "";
+                String language = detectLanguage(w);
+                String english = "en";
+                if (!english.equals(language)) {
+
+                    /*Statement stmt = conn.createStatement();
                 String sql;
                 sql = "SELECT * FROM translation where translation.word='" + w.trim() + "'";
                 java.sql.ResultSet rs;
@@ -111,20 +113,19 @@ public class TranslateForSemanticDistance {
                     rs = null;
                     Logger.getLogger(TranslateForSemanticDistance.class.getName()).log(Level.SEVERE, "Error while executing the sql: " + sql + ". Message Translator: " + ex.getMessage() );
                 }*/
-                
-                translated = cache.get(w.toLowerCase());
-                
-                if (translated==null) {
-                    translated = traductorBing(w.trim()).trim().toLowerCase();
-                    if (translated.equals(w.trim().toLowerCase())) {
-                        translated = traductorYandex(w.trim()).toLowerCase();
+                    translated = cache.get(w.toLowerCase());
+
+                    if (translated == null) {
+                        translated = traductorBing(w.trim()).trim().toLowerCase();
+                        if (translated.equals(w.trim().toLowerCase())) {
+                            translated = traductorYandex(w.trim()).toLowerCase();
+                        }
+
+                        cache.put(w.toLowerCase(), translated);
+
                     }
-                    
-                    cache.put(w.toLowerCase(), translated);
-                    
-                }
-                
-                /*if (rs != null) {
+
+                    /*if (rs != null) {
                     if (rs.next()) {
                         translated = rs.getString("value");
                         rs.close();
@@ -152,11 +153,13 @@ public class TranslateForSemanticDistance {
                         translated = traductorBing(w.trim()).trim().toLowerCase();
                     }
                 }*/
+                } else {
+                    translated = w.trim().toLowerCase();
+                }
+                ls.add(translated.trim().toLowerCase());
             }
-            else {
-                translated = w.trim().toLowerCase();
-            }
-            ls.add(translated.trim().toLowerCase());
+        } catch (Exception ex) {
+            Logger.getLogger(TranslateForSemanticDistance.class.getName()).log(Level.SEVERE, "Error en traduccion.", ex);
         }
 //        conn.close();
         cache.kill();

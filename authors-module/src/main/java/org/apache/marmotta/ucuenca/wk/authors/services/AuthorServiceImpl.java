@@ -32,6 +32,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -135,6 +136,8 @@ public class AuthorServiceImpl implements AuthorService {
     private static int one = 1;
     
     private static final String FILENAME = "DesambiguacionAutoresLog.csv";
+    
+    private Set<Entry> pairsCompared = null;
     
     private BufferedWriter bw = null;
     //private FileWriter fw = null;
@@ -372,6 +375,9 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public String searchDuplicates() {
+        //Keep track of the pairs of authors compared to avoid compairing them again.
+        pairsCompared = new HashSet<Entry>();
+        
         FileWriter fw = null;
         try {
             String allAuthorsQuery = queriesService.getAuthors(); 
@@ -402,7 +408,7 @@ public class AuthorServiceImpl implements AuthorService {
                 
                 out.println(" Author Number: " + authorCount);
                 //bw.write(" Author Number: " + authorCount);
-                log.error(" Author Number: " + authorCount, " Author Number: " + authorCount);
+                log.error(" Author Number: " + authorCount, " Author Number: " + authorCount);               
                 //Encontramos los nombres del autor actual
                 String getNamesQuery = queriesService.getAuthorDataQuery(authorResource);
                 TupleQueryResult namesAuthor = executeQuery(repository, getNamesQuery);
@@ -461,6 +467,7 @@ public class AuthorServiceImpl implements AuthorService {
             log.info("Finished to search for duplicate authors DSpace.");
         } catch (QueryEvaluationException | RepositoryException | MalformedQueryException | IOException ex) {
             log.error("Cannot search for duplicate authors DSpace. Error: {}", ex);
+            pairsCompared = null;
             return ex.getMessage();
         } finally {
             try {
@@ -478,6 +485,7 @@ public class AuthorServiceImpl implements AuthorService {
                 log.error("Cannot search for duplicate authors DSpace. Error: {}", ex);
 
             }
+            pairsCompared = null;
         }
         return "Duplicate authors searched";
     }
@@ -660,14 +668,20 @@ public class AuthorServiceImpl implements AuthorService {
                 otherGivenName = next.getBinding("firstName").getValue().stringValue().trim();
                 otherLastName = next.getBinding("lastName").getValue().stringValue().trim();
                 
+                /*if (pairsCompared.contains(new SimpleEntry<>(authorResource, similarAuthorResource)) 
+                        || pairsCompared.contains(new SimpleEntry<>(similarAuthorResource, authorResource)) ) {
+                    log.error("Comparados: " + authorResource + " - " +  similarAuthorResource );
+                }*/
+                
                 boolean equalNames = false;
                 if (!setResult.contains(similarAuthorResource) && !authorResource.equals(similarAuthorResource) 
-                        && !setExplored.contains(similarAuthorResource)) {
+                        && !setExplored.contains(similarAuthorResource) && !(pairsCompared.contains(new SimpleEntry<>(authorResource, similarAuthorResource)) 
+                        || pairsCompared.contains(new SimpleEntry<>(similarAuthorResource, authorResource))) ) {
                     
                     float jaccard = distanceService.jaccardDistance(nombresOrig + " " + apellidosOrig, otherGivenName + " " + otherLastName);
                     boolean initialMatch = checkInitials(givenName.trim(), otherGivenName);
                     equalNames = getEqualNames(nombresOrig, apellidosOrig, otherGivenName, otherLastName, semanticCheck, repository) 
-                            || (jaccard > 0.85 && jaccard <= 1.0 && initialMatch);
+                            || (jaccard > 0.88 && jaccard <= 1.0 && initialMatch);
                     //double treeshold = 0.85;
                     if (equalNames) {
                         bw.write(nombresOrig + " - " + apellidosOrig + "," + otherGivenName + " - " + otherLastName + "," 
@@ -708,6 +722,8 @@ public class AuthorServiceImpl implements AuthorService {
                         setResult.add(similarAuthorResource);
                     }
                     
+                    Entry<String,String> pair = new SimpleEntry<>(authorResource, similarAuthorResource);
+                    pairsCompared.add(pair);
                 }
                 setExplored.add(similarAuthorResource);
             }
