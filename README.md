@@ -2,6 +2,10 @@
 
 Ecuadorian Semantic Repository of Ecuadorian Academics that allows the discovery of common research areas. The platform is based on the Apache Marmotta Linked Data Platform.
 
+# ****IMPORTANT NOTICE**** #
+
+## This repository is no longer under maintenance. Project has been renamed as REDI. If you're interested in the latest work being done by current maintainers, jump to this [repository](https://github.com/ucuenca/redi)
+
 **Build status**
 
 [ ![Codeship Status for santteegt/wkhuska](https://codeship.com/projects/26b04380-b7fa-0133-2ed7-6ef29f71ac4a/status?branch=master)](https://codeship.com/projects/134976)
